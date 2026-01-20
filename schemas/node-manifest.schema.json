@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lll-network.com/schemas/node-manifest.json",
+  "title": "LLL Network Node Manifest",
+  "description": "Schema for LLL-Lite node registration manifests",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "const": "lll.network/v1"
+    },
+    "kind": {
+      "type": "string",
+      "const": "NetworkNode"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^lll-[a-z0-9-]+-[a-f0-9]{8}$",
+          "description": "Unique node identifier (format: lll-<name>-<random>)"
+        },
+        "labels": {
+          "type": "object",
+          "properties": {
+            "region": {
+              "type": "string",
+              "description": "Geographic region"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["home-node", "community-node", "organization-node"],
+              "description": "Type of node"
+            }
+          }
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["displayName", "operator", "connectivity"],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Human-readable name for the node"
+        },
+        "operator": {
+          "type": "object",
+          "required": ["email"],
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "Operator contact email"
+            }
+          }
+        },
+        "connectivity": {
+          "type": "object",
+          "required": ["type", "endpoint"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["cloudflare-tunnel", "tailscale", "manual"],
+              "description": "Network connectivity method"
+            },
+            "endpoint": {
+              "type": "string",
+              "description": "Public endpoint hostname"
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Human-readable location description"
+            },
+            "coordinates": {
+              "type": "object",
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "longitude": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
