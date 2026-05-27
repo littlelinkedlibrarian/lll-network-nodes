@@ -1,0 +1,26 @@
+# LLL Network Node Registration
+# Node: lll-lite-node-local
+# Type: TypeScript/Express + PostgreSQL (Drizzle)
+
+apiVersion: lll.network/v1
+kind: NetworkNode
+metadata:
+  name: lll-lite-node-local
+  labels:
+    region: local
+    type: development-node
+    stack: typescript
+spec:
+  displayName: "My LLL Node"
+
+  operator:
+    email: "operator@example.com"
+
+  connectivity:
+    type: manual
+    endpoint: "http://localhost:13001"
+
+  location:
+    description: ""
+
+  privacyTier: public

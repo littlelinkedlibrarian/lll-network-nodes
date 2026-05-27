@@ -1,0 +1,28 @@
+# LLL Network Node Registration
+# Node: lll-lite-1-cafebabe
+# Type: TypeScript/Express + PostgreSQL
+
+apiVersion: lll.network/v1
+kind: NetworkNode
+metadata:
+  name: lll-lite-1-cafebabe
+  labels:
+    region: local
+    type: development-node
+    environment: beta-staging
+    stack: typescript
+spec:
+  displayName: "Lite-1 Beta Staging Node"
+
+  operator:
+    email: "zachary@littlelinkedlibrarian.com"
+
+  connectivity:
+    type: manual
+    endpoint: http://192.168.0.141:13001
+
+  location:
+    description: "Local Development Environment"
+
+  # Default to public for testing
+  privacyTier: public

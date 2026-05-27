@@ -1,0 +1,28 @@
+# LLL Network Node Registration
+# Node: lll-lite-2-deadbeef
+# Type: Go/Fiber + HarperDB
+
+apiVersion: lll.network/v1
+kind: NetworkNode
+metadata:
+  name: lll-lite-2-deadbeef
+  labels:
+    region: local
+    type: development-node
+    environment: beta-staging
+    stack: go
+spec:
+  displayName: "Lite-2 Beta Staging Node"
+
+  operator:
+    email: "zachary@littlelinkedlibrarian.com"
+
+  connectivity:
+    type: manual
+    endpoint: http://192.168.0.141:13002
+
+  location:
+    description: "Local Development Environment"
+
+  # Default to public for testing
+  privacyTier: public
