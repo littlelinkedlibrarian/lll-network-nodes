@@ -8,14 +8,14 @@ metadata:
   name: lll-lite-1-cafebabe
   labels:
     region: local
-    type: development-node
+    type: home-node
     environment: beta-staging
     stack: typescript
 spec:
   displayName: "Lite-1 Beta Staging Node"
 
   operator:
-    email: "zachary@littlelinkedlibrarian.com"
+    email: "admin@littlelibrary.local"
 
   connectivity:
     type: manual

@@ -8,14 +8,14 @@ metadata:
   name: lll-lite-2-deadbeef
   labels:
     region: local
-    type: development-node
+    type: home-node
     environment: beta-staging
     stack: go
 spec:
   displayName: "Lite-2 Beta Staging Node"
 
   operator:
-    email: "zachary@littlelinkedlibrarian.com"
+    email: "admin@littlelibrary.local"
 
   connectivity:
     type: manual
