@@ -1,94 +1,78 @@
 # LLL Network Nodes Registry
 
-This repository contains the registration manifests for all nodes in the Little Linked Librarian federated network.
+This repository is the human-reviewed admission boundary for independently operated Little Linked Librarian nodes. A merged manifest records an operator's request to join; it never contains credentials and it never transfers ownership of the node's catalog to Central.
 
-## How to Register Your Node
+Compatibility is not membership. A node becomes a network member only after its manifest passes review, Central registers it as `pending`, the operator installs the one-time node credential, Central observes a healthy heartbeat, and a maintainer approves it.
 
-1. **Set up your node** following the [lll-lite setup guide](https://github.com/littlelinkedlibrarian/lll-lite)
+## NodeKit and the ICM handoff
 
-2. **Run the bootstrap script** which will generate your node manifest:
-   ```bash
-   ./bootstrap/setup.sh
-   ```
+[Little Linked Librarian: NodeKit](https://github.com/littlelinkedlibrarian/lll-icm-node-builder) uses the Interpretable Context Methodology (ICM) to guide a learner and coding agent through discovery, specification, architecture, scaffolding, build, validation, and release. When the learner chooses the connected path, Stage 07 produces a secret-free candidate manifest for this repository.
 
-3. **Submit a Pull Request** adding your manifest to `nodes/`:
-   - Fork this repository
-   - Add your `nodes/<your-node-id>.yaml` file
-   - Create a PR with the title "Add node: <your-node-name>"
+The checked-in Happy Box application is one NodeKit reference run. Other implementations may use different languages, user interfaces, and datastores as long as they pass the same public compatibility contract. Read [the ICM onboarding contract](docs/ICM-ONBOARDING.md) for the boundary between a generated node, this registry, and LLL Central.
 
-4. **Wait for approval** from network administrators
+## Registration at a glance
 
-5. **Receive your API key** once approved (sent to your operator email)
+1. Build and validate an LLL-compatible node. NodeKit is the supported learning path.
+2. Give the node one stable HTTPS origin for its branded UI and compatible API.
+3. Create an account at LLL Central. The manifest ties the node to that account without including a password or bearer token.
+4. Copy [`examples/node-manifest.yaml`](examples/node-manifest.yaml) to `nodes/<node-id>.yaml` and complete the human-reviewed fields.
+5. Run `python3 scripts/validate_manifests.py`.
+6. Open a pull request titled `Add node: <display name>`.
+7. Maintainers review identity, consent, location, privacy, endpoint ownership, and contract evidence.
+8. After merge, a maintainer verifies the live node and runs the registration tool from a trusted admin environment. Central creates the node as `pending`; its one-time key is delivered to the reviewed operator and is never written to Git, logs, or the manifest.
+9. The operator enables the heartbeat. After Central reports the node healthy, a maintainer runs the approval tool from the trusted environment.
 
-## Node Manifest Format
+External HTTPS nodes do not need to join Kubernetes or the Istio mesh. Istio remains an optional transport boundary for deployments managed by LLL; the application registry and live compatibility contract are the membership boundary.
 
-```yaml
-apiVersion: lll.network/v1
-kind: NetworkNode
-metadata:
-  name: lll-seattle-abc123
-  labels:
-    region: pacific-northwest
-    type: home-node
-spec:
-  displayName: "Seattle Downtown Library Box"
+## Public compatibility profile
 
-  operator:
-    email: "operator@example.com"
+The current `lll-lite` `0.1.0` profile consists of six anonymous, read-only routes:
 
-  connectivity:
-    type: cloudflare-tunnel
-    endpoint: lll-seattle-abc123.lll-network.com
+- `GET /health`
+- `GET /api/books`
+- `GET /api/books/{id}`
+- `GET /api/boxes`
+- `GET /api/boxes/{id}`
+- `GET /api/boxes/{id}/books`
 
-  location:
-    description: "Seattle, WA, USA"
-    coordinates:
-      latitude: 47.6062
-      longitude: -122.3321
+Central reads current public inventory from eligible nodes; it does not replicate their canonical data. Product writes, operator identity, OpenAI credentials, source scans, pending candidates, private data, and local persistence remain under the node operator's control.
+
+For the current Central release, `spec.connectivity.endpoint` must be the HTTPS origin that serves both the branded UI and compatible API. The manifest also records `uiUrl` and `apiBaseUrl` so the future split-origin registry contract can be introduced without changing the human review model; today they must resolve to the same origin.
+
+## What belongs in a manifest
+
+- A unique `lll-...` node ID and human-readable display name
+- A reviewed Central account ID and notification email
+- A public HTTPS origin and connectivity type
+- A truthful public location or service-area centroid
+- A privacy tier and explicit publication consent
+- A pinned compatibility profile, version, and capabilities
+- Non-sensitive implementation metadata used to explain the learning outcome
+
+Never commit API keys, operator tokens, OpenAI credentials, passwords, private keys, tunnel credentials, database URLs, or private media.
+
+## Status lifecycle
+
+```text
+candidate manifest -> reviewed PR -> merged -> pending in Central
+                   -> healthy heartbeat -> active
+                   -> suspended or removed when necessary
 ```
 
-## Approval Process
+A failed heartbeat never disables the node's local application. Removing a manifest or suspending a registry record does not delete the operator's books.
 
-1. **Automated validation** checks manifest format and schema
-2. **Admin review** verifies:
-   - Operator email is valid
-   - Location is legitimate
-   - No duplicate nodes in the area
-   - Endpoint format is correct
-3. **Approval** triggers:
-   - Node registered in central database
-   - Istio ServiceEntry created
-   - API key generated and sent to operator
+## Repository layout
 
-## Updating Your Node
-
-### Infrastructure changes (endpoint, connectivity type)
-Submit a PR updating your manifest.
-
-### Settings changes (privacy, allowed users)
-Use the node settings API - no PR needed.
-
-## Removing Your Node
-
-Submit a PR removing your manifest file, or contact network admins.
-
-## Directory Structure
-
-```
-lll-network-nodes/
-├── nodes/                    # Node manifest files
-│   ├── lll-seattle-abc123.yaml
-│   └── ...
-├── schemas/                  # JSON schemas for validation
-│   └── node-manifest.schema.json
-├── scripts/                  # Helper scripts
-│   └── validate.sh
-└── .github/workflows/        # CI/CD automation
-    ├── validate-pr.yml
-    └── provision-node.yml
+```text
+nodes/                         reviewed registration manifests
+examples/                      templates that never provision
+schemas/node-manifest.schema.json
+scripts/validate_manifests.py  deterministic local and CI validation
+scripts/verify_live_node.py    live six-route compatibility check
+scripts/register_node.py       protected Central pending-registration boundary
+scripts/approve_node.py        protected heartbeat-gated approval boundary
+docs/ICM-ONBOARDING.md         NodeKit Stage 07 handoff and ownership model
+.github/PULL_REQUEST_TEMPLATE/ human registration-review checklist
 ```
 
-## Questions?
-
-- [LLL Documentation](https://docs.littlelinkedlibrarian.com)
-- [GitHub Issues](https://github.com/littlelinkedlibrarian/lll-network-nodes/issues)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete operator and reviewer checklist.

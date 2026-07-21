@@ -1,0 +1,43 @@
+# Non-provisioning example generated from the NodeKit Happy Box reference run.
+# Replace the operator placeholders only when preparing a reviewed registration PR.
+apiVersion: lll.network/v1
+kind: NetworkNode
+metadata:
+  name: lll-happy-box
+  labels:
+    environment: production
+    type: community-node
+    region: northeast-florida
+    stack: typescript-fastify-sqlite
+spec:
+  displayName: "Happy Box"
+
+  operator:
+    email: "node-operator@example.com"
+    centralUserId: "replace-with-central-account-id"
+
+  connectivity:
+    type: cloudflare-tunnel
+    endpoint: "https://happybox.littlelinkedlibrarian.com"
+    uiUrl: "https://happybox.littlelinkedlibrarian.com"
+    apiBaseUrl: "https://happybox.littlelinkedlibrarian.com"
+
+  location:
+    description: "66 Colon Ave, St. Augustine, FL 32084"
+
+  privacyTier: public
+  allowedUsers: []
+
+  compatibility:
+    profile: lll-lite
+    version: 0.1.0
+    capabilities:
+      - health
+      - boxes
+      - books
+      - box-inventory
+
+  consent:
+    publishManifest: true
+    publishCatalog: true
+    publishLocation: false

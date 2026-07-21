@@ -20,9 +20,21 @@ spec:
   connectivity:
     type: manual
     endpoint: http://192.168.0.141:13001
+    uiUrl: http://192.168.0.141:13001
+    apiBaseUrl: http://192.168.0.141:13001
 
   location:
     description: "Local Development Environment"
 
   # Default to public for testing
   privacyTier: public
+
+  compatibility:
+    profile: lll-lite
+    version: 0.1.0
+    capabilities: [health, boxes, books, box-inventory]
+
+  consent:
+    publishManifest: true
+    publishCatalog: false
+    publishLocation: false

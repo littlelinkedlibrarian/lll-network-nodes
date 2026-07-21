@@ -9,6 +9,7 @@ metadata:
   labels:
     region: local
     type: development-node
+    environment: development
     stack: typescript
 spec:
   displayName: "My LLL Node"
@@ -19,8 +20,20 @@ spec:
   connectivity:
     type: manual
     endpoint: "http://localhost:13001"
+    uiUrl: "http://localhost:13001"
+    apiBaseUrl: "http://localhost:13001"
 
   location:
     description: ""
 
   privacyTier: public
+
+  compatibility:
+    profile: lll-lite
+    version: 0.1.0
+    capabilities: [health, boxes, books, box-inventory]
+
+  consent:
+    publishManifest: true
+    publishCatalog: false
+    publishLocation: false

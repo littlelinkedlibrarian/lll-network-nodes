@@ -1,103 +1,112 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lll-network.com/schemas/node-manifest.json",
+  "$id": "https://littlelinkedlibrarian.com/schemas/node-manifest-v1.json",
   "title": "LLL Network Node Manifest",
-  "description": "Schema for LLL-Lite node registration manifests",
+  "description": "Secret-free, human-reviewed request to admit an independently operated node.",
   "type": "object",
+  "additionalProperties": false,
   "required": ["apiVersion", "kind", "metadata", "spec"],
   "properties": {
-    "apiVersion": {
-      "type": "string",
-      "const": "lll.network/v1"
-    },
-    "kind": {
-      "type": "string",
-      "const": "NetworkNode"
-    },
+    "apiVersion": { "const": "lll.network/v1" },
+    "kind": { "const": "NetworkNode" },
     "metadata": {
       "type": "object",
-      "required": ["name"],
+      "additionalProperties": false,
+      "required": ["name", "labels"],
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^lll-[a-z0-9-]+-[a-f0-9]{8}$",
-          "description": "Unique node identifier (format: lll-<name>-<random>)"
+          "pattern": "^lll-[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+          "maxLength": 100
         },
         "labels": {
           "type": "object",
+          "additionalProperties": false,
+          "required": ["environment", "type"],
           "properties": {
-            "region": {
-              "type": "string",
-              "description": "Geographic region"
-            },
-            "type": {
-              "type": "string",
-              "enum": ["home-node", "community-node", "organization-node"],
-              "description": "Type of node"
-            }
+            "environment": { "enum": ["production", "beta-staging", "development"] },
+            "type": { "enum": ["home-node", "community-node", "organization-node", "development-node"] },
+            "region": { "type": "string", "maxLength": 100 },
+            "stack": { "type": "string", "maxLength": 100 }
           }
         }
       }
     },
     "spec": {
       "type": "object",
-      "required": ["displayName", "operator", "connectivity"],
+      "additionalProperties": false,
+      "required": ["displayName", "operator", "connectivity", "location", "privacyTier", "compatibility", "consent"],
       "properties": {
-        "displayName": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 200,
-          "description": "Human-readable name for the node"
-        },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 200 },
         "operator": {
           "type": "object",
+          "additionalProperties": false,
           "required": ["email"],
           "properties": {
-            "email": {
-              "type": "string",
-              "format": "email",
-              "description": "Operator contact email"
-            }
+            "email": { "type": "string", "format": "email", "maxLength": 255 },
+            "centralUserId": { "type": "string", "minLength": 1, "maxLength": 100 }
           }
         },
         "connectivity": {
           "type": "object",
-          "required": ["type", "endpoint"],
+          "additionalProperties": false,
+          "required": ["type", "endpoint", "uiUrl", "apiBaseUrl"],
           "properties": {
-            "type": {
-              "type": "string",
-              "enum": ["cloudflare-tunnel", "tailscale", "manual"],
-              "description": "Network connectivity method"
-            },
-            "endpoint": {
-              "type": "string",
-              "description": "Public endpoint hostname"
-            }
+            "type": { "enum": ["cloudflare-tunnel", "tailscale", "manual"] },
+            "endpoint": { "type": "string", "format": "uri", "maxLength": 500 },
+            "uiUrl": { "type": "string", "format": "uri", "maxLength": 500 },
+            "apiBaseUrl": { "type": "string", "format": "uri", "maxLength": 500 }
           }
         },
         "location": {
           "type": "object",
+          "additionalProperties": false,
+          "required": ["description"],
           "properties": {
-            "description": {
-              "type": "string",
-              "maxLength": 500,
-              "description": "Human-readable location description"
-            },
+            "description": { "type": "string", "maxLength": 500 },
             "coordinates": {
               "type": "object",
+              "additionalProperties": false,
+              "required": ["latitude", "longitude"],
               "properties": {
-                "latitude": {
-                  "type": "number",
-                  "minimum": -90,
-                  "maximum": 90
-                },
-                "longitude": {
-                  "type": "number",
-                  "minimum": -180,
-                  "maximum": 180
-                }
+                "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+                "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
               }
             }
+          }
+        },
+        "privacyTier": { "enum": ["public", "network", "friends", "private"] },
+        "allowedUsers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "uniqueItems": true,
+          "maxItems": 100
+        },
+        "compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["profile", "version", "capabilities"],
+          "properties": {
+            "profile": { "const": "lll-lite" },
+            "version": { "const": "0.1.0" },
+            "capabilities": {
+              "type": "array",
+              "items": { "enum": ["health", "boxes", "books", "box-inventory"] },
+              "contains": { "const": "health" },
+              "minItems": 4,
+              "maxItems": 4,
+              "uniqueItems": true
+            }
+          }
+        },
+        "consent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["publishManifest", "publishCatalog", "publishLocation"],
+          "properties": {
+            "publishManifest": { "const": true },
+            "publishCatalog": { "type": "boolean" },
+            "publishLocation": { "type": "boolean" }
           }
         }
       }

@@ -1,100 +1,100 @@
-# Contributing to LLL Network Nodes
+# Contributing a network node
 
-Thank you for your interest in joining the Little Linked Librarian network!
+Thank you for operating an independent Little Linked Librarian node. A registration pull request publishes connection and location metadata, so every field must be reviewed by the human operator before submission.
 
-## Adding Your Node
+## Prerequisites
 
-### Prerequisites
+- The node continues to work with discovery disabled.
+- Its public origin uses valid HTTPS and is controlled by the operator.
+- The six `lll-lite` `0.1.0` reads are anonymous and read-only.
+- Private scans, pending candidates, management routes, and credentials are absent from those reads.
+- The operator has an LLL Central account and has copied its stable account ID from the Central profile.
+- The submitted coordinates identify a public box or consented service-area centroid, not an unsuspecting person's residence.
 
-Before submitting a node registration:
+NodeKit builders should complete Stage 06 validation and enter Stage 07 with the hybrid or connected release path selected.
 
-1. **Set up your node** - Follow the [lll-lite setup guide](https://github.com/littlelinkedlibrarian/lll-lite)
-2. **Configure networking** - Ensure your node is accessible via Cloudflare Tunnel, Tailscale, or manual port forwarding
-3. **Test locally** - Verify your node works at `http://localhost:18080`
+## Create the manifest
 
-### Submission Process
+Copy the template:
 
-1. **Fork this repository**
+```bash
+cp examples/node-manifest.yaml nodes/lll-your-node.yaml
+```
 
-2. **Create your node manifest** in `nodes/<your-node-id>.yaml`:
+Edit only that new manifest. Production IDs use lowercase letters, numbers, and hyphens, begin with `lll-`, and must match the filename.
 
-   ```yaml
-   apiVersion: lll.network/v1
-   kind: NetworkNode
-   metadata:
-     name: lll-yourname-abc12345  # Use the ID from your bootstrap script
-     labels:
-       region: your-region
-       type: home-node
-   spec:
-     displayName: "Your Node Name"
+The operator email is retained for credential delivery and network operations. Do not place contact information in the PR description. The manifest is public, so use an address intended for node administration.
 
-     operator:
-       email: "your-email@example.com"
+Run the same deterministic check as CI:
 
-     connectivity:
-       type: cloudflare-tunnel  # or: tailscale, manual
-       endpoint: your-node-id.lll-network.com
+```bash
+python3 scripts/validate_manifests.py
+```
 
-     location:
-       description: "City, State/Country"
-       coordinates:  # Optional but helpful
-         latitude: 47.6062
-         longitude: -122.3321
-   ```
+You may also verify the live contract before opening the PR:
 
-3. **Create a Pull Request** with:
-   - Title: `Add node: <your-node-name>`
-   - Description including your contact info and location
+```bash
+python3 scripts/verify_live_node.py nodes/lll-your-node.yaml
+```
 
-4. **Wait for review** - Admins will verify your submission
+## Open the pull request
 
-5. **Receive your API key** - Once approved, you'll receive your API key via email
+- Title: `Add node: <display name>`
+- Add one production manifest under `nodes/`.
+- Complete the node-registration pull-request template.
+- Do not add credentials, screenshots containing credentials, database exports, or private photos.
+- Keep unrelated application code out of the registry PR.
 
-### Review Criteria
+Passing local validation means the manifest is structurally safe; it does not guarantee approval.
 
-We verify:
-- ✅ Valid email address
-- ✅ Legitimate location
-- ✅ Proper manifest format
-- ✅ No duplicate nodes
-- ✅ Reasonable node density in area
+## Human review
 
-### After Approval
+Maintainers verify:
 
-1. Update your node's `.env` with the API key
-2. Restart your node: `docker compose restart`
-3. Your books will appear in network searches!
+- The operator knowingly requested publication and owns the endpoint.
+- The operator's Central account ID and notification email correspond.
+- The HTTPS origin is stable and the compatible reads return bounded responses.
+- The node reports the pinned profile truthfully.
+- Location and privacy choices are appropriate.
+- The node ID is unique and the change contains no secret.
+- The node remains functional when its Central adapter is disabled.
 
-## Updating Your Node
+Reviewers must not approve membership merely because a schema check passed.
 
-### Infrastructure Changes
+## After merge
 
-For changes to endpoint, connectivity type, or location:
-- Submit a PR updating your manifest file
+Workflow automation is intentionally deferred. A maintainer currently uses a trusted admin environment to revalidate the repository, run the live contract check, and invoke `scripts/register_node.py` with `ALLOW_LOCAL_CENTRAL_REGISTRATION=true`. This creates a `pending` Central record; it does not auto-approve the node.
 
-### Settings Changes
+The registration response contains a one-time node key. The tool sends it through the configured transactional-email provider to the reviewed operator email without printing it. If delivery fails after its bounded retries, the command fails visibly and leaves the node pending for administrator-assisted credential recovery; it never activates the node.
 
-For privacy tier or allowed users:
-- Use your node's settings API (no PR needed)
-- Changes sync automatically to the network
+The operator stores the received values only in the node's runtime environment:
 
-## Removing Your Node
+```env
+DISCOVERY_ENABLED=true
+CENTRAL_BASE_URL=https://beta.littlelinkedlibrarian.com
+CENTRAL_NODE_ID=lll-your-node
+CENTRAL_NODE_API_KEY=<one-time-key>
+CENTRAL_HEARTBEAT_INTERVAL_SECONDS=300
+```
 
-To leave the network:
-1. Submit a PR removing your manifest file
-2. Or contact network admins
+After restart, local operation continues normally and the node begins sending heartbeats. A maintainer confirms a recent heartbeat, zero health failures, and a passing live contract check, then invokes `scripts/approve_node.py` with `ALLOW_LOCAL_CENTRAL_APPROVAL=true` from the trusted environment. Only that step changes the registry status from `pending` to `active`.
 
-Your local node will continue to work standalone.
+## Updates and removal
 
-## Code of Conduct
+- Submit endpoint, UI URL, API base URL, location, compatibility, or operator changes as a new PR.
+- Node-owned display and privacy settings may use the authenticated Central node-settings API when supported.
+- Removing a manifest requires human review and a separate Central suspension/removal action; deletion is never inferred silently from a Git diff.
+- A lost key requires administrator-assisted recovery. A node with its current key can use Central's key-rotation endpoint.
 
-- Be respectful of other node operators
-- Don't spam the network with fake nodes
-- Keep your contact info up to date
-- Report any issues you encounter
+## Maintainer environment
 
-## Questions?
+The trusted maintainer environment requires these secrets:
 
-- Open an issue in this repository
-- Email: support@littlelinkedlibrarian.com
+- `CENTRAL_API_URL`
+- `CENTRAL_ADMIN_TOKEN`
+- `SENDGRID_API_KEY`
+- `KEY_DELIVERY_FROM_EMAIL`
+
+Restrict access to this environment and require a second maintainer to confirm the reviewed manifest before registration or approval. Do not use a general user token or a node key as the Central admin token.
+
+Central currently authenticates this boundary with an admin JWT. Keep its lifetime short, load it only for the planned operation, and replace this temporary operational bridge with a dedicated narrowly scoped automation identity when Central exposes one.

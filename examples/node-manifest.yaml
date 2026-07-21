@@ -1,0 +1,44 @@
+apiVersion: lll.network/v1
+kind: NetworkNode
+metadata:
+  name: lll-garden-gate
+  labels:
+    environment: production
+    type: community-node
+    region: northeast-florida
+    stack: typescript-sqlite
+spec:
+  displayName: "Garden Gate Library"
+
+  operator:
+    email: "node-operator@example.com"
+    centralUserId: "replace-with-central-account-id"
+
+  connectivity:
+    type: cloudflare-tunnel
+    endpoint: "https://garden-gate.example.com"
+    uiUrl: "https://garden-gate.example.com"
+    apiBaseUrl: "https://garden-gate.example.com"
+
+  location:
+    description: "St. Augustine, Florida"
+    coordinates:
+      latitude: 29.9012
+      longitude: -81.3124
+
+  privacyTier: public
+  allowedUsers: []
+
+  compatibility:
+    profile: lll-lite
+    version: 0.1.0
+    capabilities:
+      - health
+      - boxes
+      - books
+      - box-inventory
+
+  consent:
+    publishManifest: true
+    publishCatalog: true
+    publishLocation: true
