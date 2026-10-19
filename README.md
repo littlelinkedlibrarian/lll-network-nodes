@@ -4,6 +4,10 @@ This repository is the human-reviewed admission boundary for independently opera
 
 Compatibility is not membership. A node becomes a network member only after its manifest passes review, Central registers it as `pending`, the operator installs the one-time node credential, Central observes a healthy heartbeat, and a maintainer approves it.
 
+## Start here
+
+Agents can use [CONTEXT.md](CONTEXT.md) to find the relevant files without loading the whole repository. New developers should start with [NodeKit's learner guide](https://github.com/littlelinkedlibrarian/lll-icm-node-builder/blob/main/START-HERE.md). To use the hosted service directly, see [Central API and MCP capabilities](https://beta.littlelinkedlibrarian.com/integrations). Central source is private; these two public repositories provide the learning and admission paths.
+
 ## NodeKit and the ICM handoff
 
 [Little Linked Librarian: NodeKit](https://github.com/littlelinkedlibrarian/lll-icm-node-builder) uses the Interpretable Context Methodology (ICM) to guide a learner and coding agent through discovery, specification, architecture, scaffolding, build, validation, and release. When the learner chooses the connected path, Stage 07 produces a secret-free candidate manifest for this repository.
